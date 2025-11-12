@@ -1,16 +1,16 @@
-Now includes cloudflared. Configure on cloudflare.com and paste your token in the .env file.  
+Now includes cloudflared. Configure on cloudflare.com and paste your token in the .env file.
 
 for step by step instructions follow this guide: https://www.reddit.com/r/n8n/comments/1l9mi6k/major_update_to_n8nautoscaling_build_step_by_step/
 
-original version without cloudflared is saved in the branches for those who don't want to use it. 
+original version without cloudflared is saved in the branches for those who don't want to use it.
 
 # n8n Autoscaling System
 
 A Docker-based autoscaling solution for n8n workflow automation platform. Dynamically scales worker containers based on Redis queue length.  No need to deal with k8s or any other container scaling provider, a simple script runs it all and is easily configurable.
 
-Tested with hundreds of simultaneous executions running on a 8 core 16gb ram VPS.  
+Tested with hundreds of simultaneous executions running on a 8 core 16gb ram VPS.
 
-Includes Puppeteer and Chrome built-in for pro level scraping from the n8n code node, works better than the community nodes.  
+Includes Puppeteer and Chrome built-in for pro level scraping from the n8n code node, works better than the community nodes.
 
 Simple install, just clone the files + docker compose up
 
@@ -22,7 +22,7 @@ graph TD
     B -->|Monitors queue| C[Autoscaler]
     C -->|Scales| D[n8n Workers]
     B -->|Monitors queue| E[Redis Monitor]
-    F[PostgreSQL] -->|Stores data| A
+    F[SQLite] -->|Stores data| A
     A -->|Webhooks| G[n8n Webhook]
 ```
 
@@ -37,7 +37,7 @@ graph TD
 ## Prerequisites
 
 - Docker and Docker Compose.
-- If you are a new user, I recommend either docker desktop or using the docker convenience script for ubuntu.  
+- If you are a new user, I recommend either docker desktop or using the docker convenience script for ubuntu.
 - Set up your cloudflare domain and subdomains.
 
 ## Quick Start
@@ -54,12 +54,12 @@ graph TD
    docker compose up -d
    ```
 
-We create the shark external network in step 4 to make it easier to plug in other containers later.  If you don't want to do this, you can comment out the shark network in the docker compose file.  
+We create the shark external network in step 4 to make it easier to plug in other containers later.  If you don't want to do this, you can comment out the shark network in the docker compose file.
 
 ## Configuration
 
 - Make sure you set your own passwords and encryption keys in the .env file!!!
-- By default each worker handles 10 tasks at a time, you can modify this in the docker-compose under:      
+- By default each worker handles 10 tasks at a time, you can modify this in the docker-compose under:
    - N8N_CONCURRENCY_PRODUCTION_LIMIT=10
 - Adjust these to be greater than your longest expected workflow execution time measured in seconds:
    - N8N_QUEUE_BULL_GRACEFULSHUTDOWNTIMEOUT=300

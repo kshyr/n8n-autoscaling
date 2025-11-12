@@ -22,12 +22,6 @@ x-n8n: &service-n8n
     - QUEUE_HEALTH_CHECK_ACTIVE=${QUEUE_HEALTH_CHECK_ACTIVE}
     - N8N_QUEUE_BULL_GRACEFULSHUTDOWNTIMEOUT=${N8N_QUEUE_BULL_GRACEFULSHUTDOWNTIMEOUT}
     - N8N_GRACEFUL_SHUTDOWN_TIMEOUT=${N8N_GRACEFUL_SHUTDOWN_TIMEOUT}
-    # DB config
-    - DB_TYPE=${DB_TYPE}
-    - DB_POSTGRESDB_HOST=${POSTGRES_HOST}
-    - DB_POSTGRESDB_DATABASE=${POSTGRES_DB}
-    - DB_POSTGRESDB_USER=${POSTGRES_USER}
-    - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
     # Task Runner config
     - OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS=${OFFLOAD_MANUAL_EXECUTIONS_TO_WORKERS}
     - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
@@ -48,33 +42,11 @@ services:
     volumes:
       - redis_data:/data
 
-  postgres:
-    image: pgvector/pgvector:pg17
-    restart: unless-stopped
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - PGDATA=${PGDATA}
-      - POSTGRES_HOST_AUTH_METHOD=scram-sha-256
-      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256 --auth-local=scram-sha-256
-    #      - POSTGRES_HOST=0.0.0.0 # Listen on all interfaces inside container
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-pgvector.sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   n8n:
     <<: *service-n8n
     volumes:
       - n8n_main:/n8n
     depends_on:
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
@@ -92,8 +64,6 @@ services:
     depends_on:
       n8n:
         condition: service_healthy
-      postgres:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -105,8 +75,6 @@ services:
       - n8n_main:/n8n
     depends_on:
       n8n:
-        condition: service_healthy
-      postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -173,7 +141,6 @@ services:
         condition: service_started # or service_healthy if you have a healthcheck that passes with 0 initial replicas
 
 volumes:
-  postgres_data:
   redis_data:
   n8n_main:
   n8n_webhook:
